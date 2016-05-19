@@ -33,7 +33,11 @@ Run
     # Start by opening the help
     ./s5upload.py -h
 
-    # Upload the contents of _site to bucket called example.com
+    # Dry run (just see what would be done, -n flag):
+    # Upload the contents of directory _site to bucket called example.com
+    ./s5upload.py -n -d _site -b example.com
+
+    # Actually upload the contents of _site to bucket called example.com
     ./s5upload.py -d _site -b example.com
 
     # Upload the contents of _site to bucket called example.com
@@ -51,6 +55,8 @@ The default configuration of cache-control should be good enough for
 most use cases. If you want to modify it just know that it uses Python's
 regular expressions.
 
+When purging CloudFront cache only the uploaded/removed files are added
+to the CloudFront invalidation.
 
 Contributing
 ------------
