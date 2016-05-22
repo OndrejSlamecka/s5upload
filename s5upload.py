@@ -125,14 +125,21 @@ def file_hash(path):
 """ CloudFront tools """
 
 
-def invalidation_batch(items):
+def invalidation_batch(index_filename, items):
     """
     Given a list of FileInfo objects, creates a tuple with:
     * a list of files suitable for CloudFront,
     * invalidation identifier.
     """
-    # CloudFront needs / at the beginning of paths
-    cfitems = ['/' + fi.path for fi in items]
+    cfitems = []
+    for fi in items:
+        # CloudFront needs / at the beginning of paths
+        cfitems.append('/' + fi.path)
+
+        # If [X]index.html was changed, we also want to invalidate X
+        #     ^--> some path
+        if fi.path.endswith(config['index']):
+            cfitems.append('/' + fi.path[:-len(index_filename)])
 
     # Identify uniquely this diff
     m = hashlib.md5()
@@ -225,6 +232,7 @@ def default_configuration():
     Returns the default configuration string.
     """
     return """
+index: 'index.html'
 cache_control: # set max-age
     default: 86400 # a day
     rules:
@@ -260,6 +268,7 @@ def create_configuration(args):
     # problems
     source = choose_config_source('s5upload.yml')
     config = parse_config_source(source)
+    default = parse_config_source(default_configuration())
 
     config['dry_run'] = args.dry_run
 
@@ -274,9 +283,12 @@ def create_configuration(args):
         config['distribution'] = args.distribution
 
     # Use the default cache_control settings if they weren't specified
-    if not config['cache_control']:
-        default = parse_config_source(default_configuration)
+    if 'cache_control' not in config:
         config['cache_control'] = default['cache_control']
+
+    # Use the default index if it wasn't specified
+    if 'index' not in config:
+        config['index'] = default['index']
 
     return config
 
@@ -394,6 +406,6 @@ if __name__ == "__main__":
     diff = to_delete + to_upload
     if not config['dry_run'] and 'distribution' in config and diff:
         client = boto3.client('cloudfront')
-        items, hash = invalidation_batch(diff)
+        items, hash = invalidation_batch(config['index'], diff)
         create_cloudfront_invalidation(client, config['distribution'],
                                        items, hash)
