@@ -58,16 +58,13 @@ regular expressions.
 When purging CloudFront cache only the uploaded/removed files are added
 to the CloudFront invalidation.
 
+
 Contributing
 ------------
 
 If you want to change the code just create a pull request. Please check
 your source code with the :code:`flake8` tool. If you want to contribute but
 do not know what to do I suggest you to create unit tests :-)
-
-If this tool saved you some time and you want to support its development
-with a donation please `use Paypal
-<https://www.slamecka.cz/misc/s5upload/>`_.
 
 
 License
