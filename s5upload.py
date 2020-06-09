@@ -241,7 +241,7 @@ cache_control: # set max-age
 
 
 def parse_config_source(s):
-    return yaml.load(s)
+    return yaml.load(s, Loader=yaml.SafeLoader)
 
 
 def choose_config_source(filename):
